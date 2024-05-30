@@ -1,0 +1,101 @@
+Schema
+
+CREATE TABLE teams (
+    team_id SERIAL PRIMARY KEY,
+    team_name VARCHAR(100) NOT NULL
+);
+
+INSERT INTO teams (team_name) VALUES
+('Real Madrid'), ('Bayern Munchen'), ('Chelsea Fc'), ('Manchester City'), 
+('Paris Saint Germain'), ('Arsenal Fc'), ('Manchester United'), ('Juventus Fc'),
+('Inter Milan'), ('Barcelona Fc'), ('Liverpool Fc'), ('Lyon Fc'); 
+
+CREATE TABLE players (
+    player_id SERIAL PRIMARY KEY,
+    player_name VARCHAR(100) NOT NULL,
+    nationality VARCHAR(50) NOT NULL,
+    height DECIMAL(4, 2) NOT NULL,
+    team_id INT NOT NULL,
+    FOREIGN KEY (team_id) REFERENCES teams(team_id)
+);
+
+INSERT INTO players (player_name, nationality, height, team_id) VALUES
+('John Doe', 'USA', 1.80, 1),
+('Francisco Carrera ', 'Spain', 1.75, 1),
+('Alex Pereira', 'Brazil', 1.82, 1),
+('Heinrich Klopp', 'Germany', 1.88, 12),
+('Kylian Giroud', 'France', 1.76, 12),
+(‘Austin Smith’, ‘Canada’, 1.90, 6),
+(‘Peter Wright’, ‘England’, 1.60, 7),
+(‘Oleksander Czech’, ‘Ukraine’, 1.85, 2),
+(‘Fedor Lanko’, ‘Russia’, 1.72, 3),
+(‘Kwasi Koduwa’, ‘Ghana’, 1.91, 8)
+(‘Punit Singh’, ‘India’, 1.69, 9),
+(‘Ceri Mureadhach’, ‘Moldova’, 1.82, 10),
+(‘Phoebus Claudio’, ‘Greece’, 1.74, 11),
+(‘Boro Vadik’, ‘Finland’, 1.88, 3),
+(‘Asif Aphrodisius’, ‘Somalia’, 1.59, 2),
+(‘Ron Nezih’, ‘Nepal’, 1.71, 3),
+(‘Hercules Smith’, ‘Sweden’, 1.79, 2),
+(‘Alve Tangi’, ‘Tibet’, 1.66, 1),
+(‘Pablo Sanchez’, ‘México’, 1.74, 6),
+(‘Mark Smith’, ‘Canada’, 2.10, 8),
+
+
+CREATE TABLE matches (
+    match_id SERIAL PRIMARY KEY,
+    home_team_id INT NOT NULL,
+    away_team_id INT NOT NULL,
+    home_team_goals INT NOT NULL,
+    away_team_goals INT NOT NULL,
+    match_date DATE NOT NULL,
+    FOREIGN KEY (home_team_id) REFERENCES teams(team_id),
+    FOREIGN KEY (away_team_id) REFERENCES teams(team_id)
+);
+
+INSERT INTO matches (home_team_id, away_team_id, home_team_goals, away_team_goals, match_date) VALUES
+(1, 2, 3, 1, '2023-01-01'),
+(3, 4, 2, 2, '2023-01-02');
+
+CREATE TABLE standings (
+    team_id INT PRIMARY KEY,
+    wins INT NOT NULL DEFAULT 0,
+    losses INT NOT NULL DEFAULT 0,
+    draws INT NOT NULL DEFAULT 0,
+    goals_scored INT NOT NULL DEFAULT 0,
+    goals_against INT NOT NULL DEFAULT 0,
+    games_played INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (team_id) REFERENCES teams(team_id)
+);
+
+INSERT INTO standings (team_id) 
+SELECT team_id FROM teams;
+
+UPDATE standings SET 
+    wins = wins + 1,
+    goals_scored = goals_scored + 3,
+    goals_against = goals_against + 1,
+    games_played = games_played + 1
+WHERE team_id = 1;
+
+UPDATE standings SET 
+    losses = losses + 1,
+    goals_scored = goals_scored + 1,
+    goals_against = goals_against + 3,
+    games_played = games_played + 1
+WHERE team_id = 2;
+
+Querey
+
+SELECT t.team_name, s.wins, s.losses, s.draws, s.goals_scored, s.goals_against, s.games_played
+FROM standings s
+JOIN teams t ON s.team_id = t.team_id
+ORDER BY s.wins DESC, s.goals_scored DESC;
+SELECT p.player_name, p.nationality, p.height
+FROM players p
+WHERE p.team_id = 1;
+SELECT t1.team_name AS home_team, t2.team_name AS away_team, m.home_team_goals, m.away_team_goals, m.match_date
+FROM matches m
+JOIN teams t1 ON m.home_team_id = t1.team_id
+JOIN teams t2 ON m.away_team_id = t2.team_id
+ORDER BY m.match_date DESC;
